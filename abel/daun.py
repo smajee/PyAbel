@@ -17,7 +17,7 @@ import abel
 
 
 def daun_transform(data, reg=0.0, degree=0, dr=1.0, direction='inverse',
-                   basis_dir=None, verbose=True):
+                   basis_dir=None, verbose=True, transposed=False):
     """
     Forward and inverse Abel transforms based on onion-peeling deconvolution
     using Tikhonov regularization described in
@@ -91,11 +91,15 @@ def daun_transform(data, reg=0.0, degree=0, dr=1.0, direction='inverse',
     recon : m × n numpy array
         the transformed (half) image
     """
+
     # make sure that the data has the right shape (1D must be converted to 2D)
     # and type:
     dim = len(data.shape)
     data = np.atleast_2d(data).astype(float)
     h, w = data.shape
+
+    if transposed:
+        direction = 'forward'
 
     if reg in [None, 0]:
         reg_type, strength = None, 0
@@ -111,6 +115,9 @@ def daun_transform(data, reg=0.0, degree=0, dr=1.0, direction='inverse',
     # load the basis sets and compute the transform matrix
     M = get_bs_cached(w, degree, reg_type, strength, direction, basis_dir,
                       verbose)
+
+    if transposed:
+        M = M.T #transposed transform
 
     if reg == 'nonneg':
         if verbose:
